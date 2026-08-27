@@ -2,6 +2,7 @@ import './App.css'
 import Header from './components/header';
 import PageBanner from './components/page-banner/';
 import Checkout from './components/checkout/';
+import FeaturesSection from './components/features-section/';
 
 function App() {
 
@@ -14,6 +15,7 @@ function App() {
         currentLabel="Checkout"
       />
       <Checkout />
+      <FeaturesSection />
     </>
   )
 }
