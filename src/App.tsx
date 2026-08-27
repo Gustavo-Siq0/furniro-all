@@ -1,6 +1,7 @@
 import './App.css'
 import Header from './components/header';
 import PageBanner from './components/page-banner/';
+import Checkout from './components/checkout/';
 
 function App() {
 
@@ -12,6 +13,7 @@ function App() {
         parentLabel="Home"
         currentLabel="Checkout"
       />
+      <Checkout />
     </>
   )
 }
