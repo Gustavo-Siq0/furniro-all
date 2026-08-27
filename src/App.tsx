@@ -1,13 +1,17 @@
 import './App.css'
 import Header from './components/header';
+import PageBanner from './components/page-banner/';
 
 function App() {
 
   return (
     <>
-      <div className="min-h-screen pt-[80px] md:pt-[100px]">
-        <Header />
-      </div>
+      <Header />
+      <PageBanner
+        title="Checkout"
+        parentLabel="Home"
+        currentLabel="Checkout"
+      />
     </>
   )
 }
