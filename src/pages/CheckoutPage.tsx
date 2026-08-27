@@ -3,9 +3,9 @@ import Checkout from "../components/checkout";
 import FeaturesSection from "../components/features-section";
 import Footer from "../components/footer";
 
-function Home() {
+function CheckoutPage() {
   return (
-    <>
+    <main className='pt-[80px] md:pt-[100px]'>
       <PageBanner
         title="Checkout"
         parentLabel="Home"
@@ -14,8 +14,8 @@ function Home() {
       <Checkout />
       <FeaturesSection />
       <Footer />
-    </>
+    </main>
   );
 }
 
-export default Home;
+export default CheckoutPage;
