@@ -17,3 +17,5 @@ declare module '@splidejs/react-splide' {
   export const Splide: ComponentType<SplideProps>;
   export const SplideSlide: ComponentType<SplideSlideProps>;
 }
+
+declare module '@splidejs/react-splide/css';

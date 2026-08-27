@@ -1,0 +1,1 @@
+export { Forniture as default, Forniture } from './Forniture';

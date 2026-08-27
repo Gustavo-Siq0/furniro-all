@@ -1,0 +1,1 @@
+export { OurProducts as default, OurProducts } from './OurProducts';
