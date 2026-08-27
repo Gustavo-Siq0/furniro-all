@@ -60,7 +60,7 @@ const Header = () =>  {
             </a>
 
             <Link
-              to="/"
+              to="/contact"
               className="hover:text-[#B88E2F] transition-colors"
             >
               Contact
@@ -165,7 +165,7 @@ const Header = () =>  {
           </a>
 
           <Link
-            to="/"
+            to="/contact"
             onClick={closeMenu}
             className="hover:text-[#B88E2F]"
           >
