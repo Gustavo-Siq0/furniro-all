@@ -4,8 +4,11 @@ import { useCartStore } from "../../store/useCartStore";
 import trashIcon from "../../assets/svg/trashIcon.svg";
 import { formatPrice } from "../../utils/formatPrice";
 
-const parsePrice = (price: string): number =>
-  Number.parseInt(price.replace(/\D/g, ""), 10) || 0;
+const parsePrice = (price: string | number): number => {
+  if (typeof price === "number") return price;
+
+  return Number.parseInt(price.replace(/\D/g, ""), 10) || 0;
+};
 
 export function CartConfig() {
   const { items, updateQuantity, removeItem, clearCart } = useCartStore();

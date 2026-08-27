@@ -1,12 +1,17 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getMockProduct } from '../../data/mockProducts';
+import { getProduct } from '../../api/products';
+import type { Product } from '../../types/product';
 
 export function ProductTabsSection() {
   const { id } = useParams<{ id: string }>();
-  const product = getMockProduct(id);
+  const [product, setProduct] = useState<Product | null>(null);
   const [activeTab, setActiveTab] = useState<'description' | 'additional'>('description');
   const images = product?.gallery.slice(0, 2) || [];
+
+  useEffect(() => {
+    getProduct(id || '1').then(setProduct).catch(() => setProduct(null));
+  }, [id]);
 
   return (
     <section className='w-full border-t border-[#D9D9D9] pb-[66px] pt-[48px] font-poppins'>

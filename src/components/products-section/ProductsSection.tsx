@@ -1,42 +1,31 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import FilterBar from "../filter-bar";
 import ProductCard from "../product-card";
+import { getProducts } from "../../api/products";
 import type { Product } from "../../types/product";
-import productImage from "../../assets/img/fundo-home.png";
 
 interface ProductsSectionProps {
   category: string;
 }
 
-const mockProducts: Product[] = Array.from({ length: 16 }, (_, index) => ({
-  id: index + 1,
-  sku: `FURN-${String(index + 1).padStart(3, "0")}`,
-  name: ["Syltherine", "Leviosa", "Lolito", "Respira"][index % 4],
-  category: "living room",
-  description: "Stylish cafe chair",
-  price: `Rp ${(2500000 + index * 125000).toLocaleString("en-US")}`,
-  oldPrice: index % 3 === 0 ? "Rp 3,500,000" : null,
-  image: productImage,
-  gallery: [productImage],
-  colors: [],
-  sizes: [],
-  badge: index % 4 === 0 ? "New" : index % 3 === 0 ? "-30%" : null,
-  badgeColor: index % 4 === 0 ? "#2EC1AC" : "#E97171",
-  complementaryDescription: "",
-  additionalInfo: "",
-  rawPrice: 2500000 + index * 125000,
-}));
-
 export function ProductsSection({ category }: ProductsSectionProps) {
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(16);
   const [sortBy, setSortBy] = useState("Default");
 
   const selectedCategory = category?.toLowerCase() || "";
-  const filteredProducts = selectedCategory
-    ? mockProducts.filter((product) => product.category === selectedCategory)
-    : mockProducts;
-  const sortedProducts = [...filteredProducts].sort((first, second) => {
+
+  useEffect(() => {
+    getProducts({ category: selectedCategory })
+      .then((response) => setAllProducts(response.data))
+      .catch(() => setHasError(true))
+      .finally(() => setIsLoading(false));
+  }, [selectedCategory]);
+
+  const sortedProducts = [...allProducts].sort((first, second) => {
     if (sortBy === "Price: Low to High") return (first.rawPrice ?? 0) - (second.rawPrice ?? 0);
     if (sortBy === "Price: High to Low") return (second.rawPrice ?? 0) - (first.rawPrice ?? 0);
     if (sortBy === "Newest") return second.id - first.id;
@@ -64,7 +53,11 @@ export function ProductsSection({ category }: ProductsSectionProps) {
 
       <div className="w-full bg-white px-4 py-10 lg:px-0">
         <div className="mx-auto w-full max-w-[1240px]">
-          {products.length === 0 ? (
+          {isLoading ? (
+            <div className="py-12 text-center font-poppins text-[#898989]">Carregando produtos...</div>
+          ) : hasError ? (
+            <div className="py-12 text-center font-poppins text-red-500">Não foi possível carregar os produtos.</div>
+          ) : products.length === 0 ? (
             <div className="py-12 text-center font-poppins text-[#898989]">Nenhum produto encontrado.</div>
           ) : (
             <div className="mb-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">

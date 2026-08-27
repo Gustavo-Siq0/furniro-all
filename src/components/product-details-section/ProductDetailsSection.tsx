@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { getMockProduct } from '../../data/mockProducts';
+import { getProduct } from '../../api/products';
 import type { Product, ProductColor, ProductSize } from '../../types/product';
 import { formatPrice } from '../../utils/formatPrice';
 import facebookIcon from '../../assets/svg/facebook.svg';
@@ -14,12 +14,26 @@ const parsePrice = (price: string) => Number.parseInt(price.replace(/\D/g, ''), 
 
 export function ProductDetailsSection() {
   const { id } = useParams<{ id: string }>();
-  const product = getMockProduct(id);
-  const [selectedImage, setSelectedImage] = useState(product?.image || '');
-  const [selectedSize, setSelectedSize] = useState<ProductSize | null>(product?.sizes[0] || null);
-  const [selectedColor, setSelectedColor] = useState<ProductColor | null>(product?.colors[0] || null);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState('');
+  const [selectedSize, setSelectedSize] = useState<ProductSize | null>(null);
+  const [selectedColor, setSelectedColor] = useState<ProductColor | null>(null);
   const [quantity, setQuantity] = useState(1);
   const addItem = useCartStore((state) => state.addItem);
+
+  useEffect(() => {
+    getProduct(id || '1').then((data) => {
+      setProduct(data);
+      setSelectedImage(data.gallery[0] || data.image);
+      setSelectedSize(data.sizes[0] || null);
+      setSelectedColor(data.colors[0] || null);
+    }).catch(() => setProduct(null)).finally(() => setIsLoading(false));
+  }, [id]);
+
+  if (isLoading) {
+    return <div className='w-full px-4 py-12 text-center font-poppins text-[#898989]'>Carregando produto...</div>;
+  }
 
   if (!product) {
     return <div className='w-full px-4 py-12 text-center font-poppins text-red-500'>Product not found.</div>;

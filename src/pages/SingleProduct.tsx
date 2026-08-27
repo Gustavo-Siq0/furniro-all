@@ -1,14 +1,18 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import ProductBreadcrumb from '../components/product-breadcrumb';
 import ProductDetailsSection from '../components/product-details-section';
 import ProductTabsSection from '../components/product-tabs-section';
 import RelatedProductsSection from '../components/related-products-section';
-import { getMockProduct } from '../data/mockProducts';
+import { getProduct } from '../api/products';
 
 export function SingleProduct() {
   const { id } = useParams<{ id: string }>();
-  const product = getMockProduct(id);
+  const [productName, setProductName] = useState('');
+
+  useEffect(() => {
+    getProduct(id || '1').then((product) => setProductName(product.name)).catch(() => setProductName(''));
+  }, [id]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -17,7 +21,7 @@ export function SingleProduct() {
   return (
     <div className='min-h-screen w-full bg-white pt-[110px]'>
       <main>
-        <ProductBreadcrumb productName={product?.name || 'Detalhes do Produto'} />
+        <ProductBreadcrumb productName={productName || 'Detalhes do Produto'} />
         <ProductDetailsSection />
         <ProductTabsSection />
         <RelatedProductsSection />

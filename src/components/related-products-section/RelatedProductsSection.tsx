@@ -1,11 +1,19 @@
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { mockProducts } from '../../data/mockProducts';
+import { getProducts } from '../../api/products';
 import { ProductCard } from '../product-card';
+import type { Product } from '../../types/product';
 
 export function RelatedProductsSection() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const products = mockProducts.filter((product) => String(product.id) !== id).slice(0, 4);
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    getProducts({ limit: 5 }).then((response) => {
+      setProducts(response.data.filter((product) => String(product.id) !== id).slice(0, 4));
+    });
+  }, [id]);
 
   return (
     <section className='w-full border-t border-[#D9D9D9] bg-white pb-[88px] pt-[55px] font-poppins'>
