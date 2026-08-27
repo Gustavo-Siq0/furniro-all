@@ -1,10 +1,41 @@
-import { Eye, EyeOff, UserRound } from 'lucide-react'
-import { useState } from 'react'
-import backgroundImage from '../assets/img/fundo-grande-casa.jpg'
+import { Eye, EyeOff, UserRound } from 'lucide-react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import backgroundImage from '../assets/img/fundo-grande-casa.jpg';
+import { registerUser } from '../api/auth';
 
 const SingleUp = () => {
-  const [showPassword, setShowPassword] = useState<boolean>(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false)
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (password !== confirmPassword) {
+      toast.error('As senhas precisam ser iguais.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      await registerUser({ email, password });
+      toast.success('Conta criada com sucesso! Faça login para continuar.');
+      navigate('/login', { replace: true });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Não foi possível criar a conta.';
+      toast.error(message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <main className='min-h-screen w-full bg-white'>
@@ -56,13 +87,16 @@ const SingleUp = () => {
               </h1>
             </div>
 
-            <form className='mt-24 flex w-full flex-col gap-8'>
+            <form className='mt-24 flex w-full flex-col gap-8' onSubmit={handleSubmit}>
               <div className='relative'>
                 <input
                   type='email'
                   id='email'
                   name='email'
                   placeholder='email'
+                  required
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
                   className='h-[30px] w-full border-none bg-[#d9d9d9] px-2 pr-10 text-[12px] font-bold text-black outline-none placeholder:text-black'
                 />
 
@@ -79,6 +113,9 @@ const SingleUp = () => {
                   id='password'
                   name='password'
                   placeholder='password'
+                  required
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
                   className='h-[30px] w-full border-none bg-[#d9d9d9] px-2 pr-10 text-[12px] font-bold text-black outline-none placeholder:text-black'
                 />
 
@@ -104,6 +141,9 @@ const SingleUp = () => {
                   id='confirm-password'
                   name='confirm-password'
                   placeholder='confirm password'
+                  required
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
                   className='h-[30px] w-full border-none bg-[#d9d9d9] px-2 pr-10 text-[12px] font-bold text-black outline-none placeholder:text-black'
                 />
 
@@ -129,16 +169,22 @@ const SingleUp = () => {
 
               <button
                 type='submit'
-                className='mx-auto mt-8 h-[23px] w-full max-w-[228px] bg-black text-[11px] font-bold text-white transition-opacity hover:opacity-80'
+                disabled={isSubmitting}
+                className='mx-auto mt-8 h-[23px] w-full max-w-[228px] bg-black text-[11px] font-bold text-white transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-60'
               >
-                Sign up
+                {isSubmitting ? 'Creating...' : 'Sign up'}
               </button>
+
+              <p className='text-center text-[12px] text-[#666]'>
+                Already have an account?{' '}
+                <Link to='/login' className='font-bold text-black hover:opacity-70'>Log in</Link>
+              </p>
             </form>
           </div>
         </section>
       </div>
     </main>
-  )
-}
+  );
+};
 
 export default SingleUp

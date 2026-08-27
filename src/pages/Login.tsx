@@ -1,10 +1,47 @@
 import { Eye, EyeOff, UserRound } from 'lucide-react';
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import backgroundImage from '../assets/img/fundo-grande-casa.jpg';
+import { loginUser } from '../api/auth';
+import { isAuthenticated, setStoredToken } from '../auth';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = (location.state as { from?: string } | null)?.from ?? '/';
+
+  useEffect(() => {
+    if (isAuthenticated()) {
+      navigate(from, { replace: true });
+    }
+  }, [from, navigate]);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const response = await loginUser({ email, password });
+      setStoredToken(response.accessToken);
+      toast.success('Login realizado com sucesso!');
+      navigate(from, { replace: true });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Não foi possível fazer login.';
+      toast.error(message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isAuthenticated()) {
+    return <Navigate to={from} replace />;
+  }
 
   return (
     <main className='min-h-screen w-full bg-white'>
@@ -34,7 +71,7 @@ const Login = () => {
               <h1 className='text-[26px] font-bold tracking-[-0.02em] text-black'>Log in</h1>
             </div>
 
-            <form className='mt-24 flex w-full flex-col gap-8' onSubmit={(event) => event.preventDefault()}>
+            <form className='mt-24 flex w-full flex-col gap-8' onSubmit={handleSubmit}>
               <div className='relative'>
                 <input
                   type='email'
@@ -42,6 +79,8 @@ const Login = () => {
                   name='email'
                   placeholder='email'
                   required
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
                   className='h-[30px] w-full border-none bg-[#d9d9d9] px-2 pr-10 text-[12px] font-bold text-black outline-none placeholder:text-black'
                 />
                 <UserRound size={19} strokeWidth={2.8} className='absolute right-2.5 top-1/2 -translate-y-1/2 text-[#222]' />
@@ -54,6 +93,8 @@ const Login = () => {
                   name='password'
                   placeholder='password'
                   required
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
                   className='h-[30px] w-full border-none bg-[#d9d9d9] px-2 pr-10 text-[12px] font-bold text-black outline-none placeholder:text-black'
                 />
                 <button
@@ -72,8 +113,12 @@ const Login = () => {
                 </button>
               </div>
 
-              <button type='submit' className='mx-auto mt-5 h-[23px] w-full max-w-[228px] bg-black text-[11px] font-bold text-white transition-opacity hover:opacity-80'>
-                Log in
+              <button
+                type='submit'
+                disabled={isSubmitting}
+                className='mx-auto mt-5 h-[23px] w-full max-w-[228px] bg-black text-[11px] font-bold text-white transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-60'
+              >
+                {isSubmitting ? 'Loading...' : 'Log in'}
               </button>
 
               <p className='text-center text-[12px] text-[#666]'>

@@ -1,14 +1,28 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ShoppingCart, UserRound } from "lucide-react";
 
 import logo from "../../assets/img/logo.png";
+import { clearStoredToken, isAuthenticated } from "../../auth";
 
 const Header = () =>  {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(isAuthenticated());
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setIsLoggedIn(isAuthenticated());
+  }, [location.pathname]);
 
   function closeMenu() {
     setIsMenuOpen(false);
+  }
+
+  function handleLogout() {
+    clearStoredToken();
+    setIsLoggedIn(false);
+    navigate('/');
   }
 
   return (
@@ -71,10 +85,26 @@ const Header = () =>  {
               AÇÕES
           ========================================= */}
           <div className="flex flex-1 items-center justify-end gap-5 lg:gap-[35px] text-[#000000]">
-            <UserRound
-              aria-label="Perfil"
-              className="size-6 cursor-pointer transition-opacity hover:opacity-75 lg:size-7"
-            />
+            <Link to={isLoggedIn ? '/' : '/login'}>
+              <UserRound
+                aria-label={isLoggedIn ? 'Perfil' : 'Login'}
+                className="size-6 cursor-pointer transition-opacity hover:opacity-75 lg:size-7"
+              />
+            </Link>
+
+            {isLoggedIn ? (
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="text-sm font-medium text-[#000000] transition-colors hover:text-[#B88E2F]"
+              >
+                Logout
+              </button>
+            ) : (
+              <Link to="/login" className="text-sm font-medium text-[#000000] transition-colors hover:text-[#B88E2F]">
+                Login
+              </Link>
+            )}
 
             <Link to="/cart">
               <ShoppingCart
@@ -175,16 +205,22 @@ const Header = () =>  {
           <hr />
 
           <Link
-            to="/"
+            to="/cart"
             onClick={closeMenu}
             className="hover:text-[#B88E2F]"
           >
             Cart
           </Link>
 
-          <button className="text-left hover:text-[#B88E2F]">
-            Profile
-          </button>
+          {isLoggedIn ? (
+            <button type="button" onClick={() => { closeMenu(); handleLogout(); }} className="text-left hover:text-[#B88E2F]">
+              Logout
+            </button>
+          ) : (
+            <Link to="/login" onClick={closeMenu} className="hover:text-[#B88E2F]">
+              Login
+            </Link>
+          )}
         </nav>
       </aside>
     </>
