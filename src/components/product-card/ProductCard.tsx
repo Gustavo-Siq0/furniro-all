@@ -1,6 +1,7 @@
 import { useState, type MouseEvent } from "react";
 import { Link } from "react-router-dom";
 import type { Product } from "../../types/product";
+import { useCartStore } from "../../store/useCartStore";
 
 interface ProductCardProps {
   product: Product;
@@ -8,10 +9,12 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const [isAdded, setIsAdded] = useState(false);
+  const addItem = useCartStore((state) => state.addItem);
 
   const handleAddToCart = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
+    addItem(product);
     setIsAdded(true);
   };
 
