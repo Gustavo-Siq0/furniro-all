@@ -1,0 +1,1 @@
+export { ProductDetailsSection as default, ProductDetailsSection } from './ProductDetailsSection';

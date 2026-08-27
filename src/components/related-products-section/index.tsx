@@ -1,0 +1,1 @@
+export { RelatedProductsSection as default, RelatedProductsSection } from './RelatedProductsSection';

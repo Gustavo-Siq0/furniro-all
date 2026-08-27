@@ -1,0 +1,1 @@
+export { ProductBreadcrumb as default, ProductBreadcrumb } from './ProductBreadcrumb';
