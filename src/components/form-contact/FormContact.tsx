@@ -1,4 +1,6 @@
+import { useState, useRef } from "react";
 import type { SubmitEvent } from "react";
+import toast from "react-hot-toast";
 import {
   Clock3,
   MapPin,
@@ -74,8 +76,66 @@ const FormInput = ({
 };
 
 const ContactSection = () => {
-  const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
+  const formRef = useRef<HTMLFormElement>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const validateForm = (formData: FormData): boolean => {
+    const name = formData.get("name") as string;
+    const email = formData.get("email") as string;
+    const message = formData.get("message") as string;
+
+    if (!name || name.trim().length === 0) {
+      toast.error("Por favor, preencha seu nome");
+      return false;
+    }
+
+    if (!email || email.trim().length === 0) {
+      toast.error("Por favor, preencha seu email");
+      return false;
+    }
+
+    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      toast.error("Email inválido");
+      return false;
+    }
+
+    if (!message || message.trim().length === 0) {
+      toast.error("Por favor, preencha sua mensagem");
+      return false;
+    }
+
+    if (message.trim().length < 10) {
+      toast.error("Mensagem deve ter pelo menos 10 caracteres");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+
+    if (!validateForm(formData)) return;
+
+    setIsSubmitting(true);
+    try {
+      // Simular envio do formulário
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      toast.success("Mensagem enviada com sucesso! Entraremos em contato em breve.", {
+        style: { background: "#2EC1AC", color: "#fff" },
+        iconTheme: { primary: "#fff", secondary: "#2EC1AC" },
+      });
+      
+      if (formRef.current) {
+        formRef.current.reset();
+      }
+    } catch (error) {
+      toast.error("Erro ao enviar mensagem. Tente novamente.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -120,6 +180,7 @@ const ContactSection = () => {
 
           {/* Form */}
           <form
+            ref={formRef}
             onSubmit={handleSubmit}
             className="w-full"
           >
@@ -161,9 +222,10 @@ const ContactSection = () => {
 
               <button
                 type="submit"
-                className="mt-[6px] h-[39px] w-full rounded-[4px] bg-[#c2952d] px-4 text-[12px] font-normal text-white transition hover:bg-[#ad8325] focus:outline-none focus:ring-2 focus:ring-[#c2952d] focus:ring-offset-2 sm:w-[165px]"
+                disabled={isSubmitting}
+                className="mt-[6px] h-[39px] w-full rounded-[4px] bg-[#c2952d] px-4 text-[12px] font-normal text-white transition hover:bg-[#ad8325] focus:outline-none focus:ring-2 focus:ring-[#c2952d] focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed sm:w-[165px]"
               >
-                Submit
+                {isSubmitting ? "Enviando..." : "Submit"}
               </button>
             </div>
           </form>

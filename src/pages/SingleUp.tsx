@@ -15,13 +15,37 @@ const SingleUp = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
+  const validateForm = (): boolean => {
+    if (!email) {
+      toast.error('Email é obrigatório');
+      return false;
+    }
+    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      toast.error('Email inválido');
+      return false;
+    }
+    if (!password) {
+      toast.error('Senha é obrigatória');
+      return false;
+    }
+    if (password.length < 6) {
+      toast.error('Senha deve ter pelo menos 6 caracteres');
+      return false;
+    }
+    if (!confirmPassword) {
+      toast.error('Confirmação de senha é obrigatória');
+      return false;
+    }
+    if (password !== confirmPassword) {
+      toast.error('As senhas precisam ser iguais');
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    if (password !== confirmPassword) {
-      toast.error('As senhas precisam ser iguais.');
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsSubmitting(true);
 
@@ -94,7 +118,7 @@ const SingleUp = () => {
                   id='email'
                   name='email'
                   placeholder='email'
-                  required
+                  
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   className='h-[30px] w-full border-none bg-[#d9d9d9] px-2 pr-10 text-[12px] font-bold text-black outline-none placeholder:text-black'
@@ -113,7 +137,7 @@ const SingleUp = () => {
                   id='password'
                   name='password'
                   placeholder='password'
-                  required
+                  
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   className='h-[30px] w-full border-none bg-[#d9d9d9] px-2 pr-10 text-[12px] font-bold text-black outline-none placeholder:text-black'
@@ -141,7 +165,7 @@ const SingleUp = () => {
                   id='confirm-password'
                   name='confirm-password'
                   placeholder='confirm password'
-                  required
+                  
                   value={confirmPassword}
                   onChange={(event) => setConfirmPassword(event.target.value)}
                   className='h-[30px] w-full border-none bg-[#d9d9d9] px-2 pr-10 text-[12px] font-bold text-black outline-none placeholder:text-black'

@@ -22,8 +22,30 @@ const Login = () => {
     }
   }, [from, navigate]);
 
+  const validateForm = (): boolean => {
+    if (!email) {
+      toast.error('Email é obrigatório');
+      return false;
+    }
+    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      toast.error('Email inválido');
+      return false;
+    }
+    if (!password) {
+      toast.error('Senha é obrigatória');
+      return false;
+    }
+    if (password.length < 6) {
+      toast.error('Senha deve ter pelo menos 6 caracteres');
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!validateForm()) return;
+
     setIsSubmitting(true);
 
     try {
@@ -78,7 +100,6 @@ const Login = () => {
                   id='email'
                   name='email'
                   placeholder='email'
-                  required
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   className='h-[30px] w-full border-none bg-[#d9d9d9] px-2 pr-10 text-[12px] font-bold text-black outline-none placeholder:text-black'
@@ -92,7 +113,6 @@ const Login = () => {
                   id='password'
                   name='password'
                   placeholder='password'
-                  required
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   className='h-[30px] w-full border-none bg-[#d9d9d9] px-2 pr-10 text-[12px] font-bold text-black outline-none placeholder:text-black'

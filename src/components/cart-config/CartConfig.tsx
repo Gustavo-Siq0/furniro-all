@@ -1,6 +1,7 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useCartStore } from "../../store/useCartStore";
+import { isAuthenticated } from "../../auth";
 import trashIcon from "../../assets/svg/trashIcon.svg";
 import { formatPrice } from "../../utils/formatPrice";
 
@@ -11,20 +12,26 @@ const parsePrice = (price: string | number): number => {
 };
 
 export function CartConfig() {
-  const { items, updateQuantity, removeItem, clearCart } = useCartStore();
+  const { items, updateQuantity, removeItem } = useCartStore();
+  const navigate = useNavigate();
   const cartTotal = items.reduce(
     (total, item) => total + parsePrice(item.price) * item.quantity,
     0,
   );
 
   const handleCheckout = () => {
-    if (items.length === 0) return;
+    if (items.length === 0) {
+      toast.error("Your cart is empty");
+      return;
+    }
 
-    clearCart();
-    toast.success("Checkout successful! Proceeding to payment.", {
-      style: { background: "#2EC1AC", color: "#fff" },
-      iconTheme: { primary: "#fff", secondary: "#2EC1AC" },
-    });
+    if (!isAuthenticated()) {
+      toast.error("Please log in to proceed to checkout");
+      navigate("/login", { state: { from: "/checkout" } });
+      return;
+    }
+
+    navigate("/checkout");
   };
 
   return (

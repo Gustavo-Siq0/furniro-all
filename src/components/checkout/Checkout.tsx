@@ -1,4 +1,8 @@
+import { useState, useRef } from "react";
 import type { SubmitEvent } from "react";
+import toast from "react-hot-toast";
+import { useCartStore } from "../../store/useCartStore";
+import { useNavigate } from "react-router-dom";
 
 type FormFieldProps = {
   label: string;
@@ -53,15 +57,112 @@ const FormField = ({
 };
 
 const Checkout = () => {
-  const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const { clearCart, items } = useCartStore();
+  const navigate = useNavigate();
+
+  const validateForm = (formData: FormData): boolean => {
+    const firstName = formData.get("firstName") as string;
+    const lastName = formData.get("lastName") as string;
+    const country = formData.get("country") as string;
+    const streetAddress = formData.get("streetAddress") as string;
+    const city = formData.get("city") as string;
+    const province = formData.get("province") as string;
+    const email = formData.get("email") as string;
+
+    if (!firstName || firstName.trim().length === 0) {
+      toast.error("First Name is required");
+      return false;
+    }
+
+    if (!lastName || lastName.trim().length === 0) {
+      toast.error("Last Name is required");
+      return false;
+    }
+
+    if (!country || country.trim().length === 0) {
+      toast.error("Country / Region is required");
+      return false;
+    }
+
+    if (!streetAddress || streetAddress.trim().length === 0) {
+      toast.error("Street address is required");
+      return false;
+    }
+
+    if (!city || city.trim().length === 0) {
+      toast.error("Town / City is required");
+      return false;
+    }
+
+    if (!province || province.trim().length === 0) {
+      toast.error("Province is required");
+      return false;
+    }
+
+    if (!email || email.trim().length === 0) {
+      toast.error("Email address is required");
+      return false;
+    }
+
+    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      toast.error("Please enter a valid email address");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log("Digitando...");
+    
+    if (items.length === 0) {
+      toast.error("Your cart is empty");
+      return;
+    }
+
+    const formData = new FormData(event.currentTarget);
+    if (!validateForm(formData)) return;
+
+    setIsSubmitting(true);
+
+    try {
+      // Simular processamento do pedido
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      const totalAmount = items.reduce((total, item) => {
+        const price = parseFloat(item.price.replace(/[^\d.]/g, ""));
+        return total + price * item.quantity;
+      }, 0);
+
+      toast.success(
+        `Order placed successfully! Total: Rs. ${totalAmount.toLocaleString("en-PK", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        {
+          style: { background: "#2EC1AC", color: "#fff" },
+          iconTheme: { primary: "#fff", secondary: "#2EC1AC" },
+          duration: 4000,
+        }
+      );
+
+      clearCart();
+      
+      // Redireciona para home após 2 segundos
+      setTimeout(() => {
+        navigate("/");
+      }, 2000);
+    } catch (error) {
+      toast.error("Error processing order. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <main className="min-h-screen bg-white px-5 py-10 sm:px-8 lg:px-12">
       <div className="mx-auto max-w-[1180px]">
         <form
+          ref={formRef}
           onSubmit={handleSubmit}
           className="grid grid-cols-1 gap-16 lg:grid-cols-[1fr_0.9fr] lg:gap-24"
         >
@@ -79,13 +180,11 @@ const Checkout = () => {
                 <FormField
                   label="First Name"
                   name="firstName"
-                  required
                 />
 
                 <FormField
                   label="Last Name"
                   name="lastName"
-                  required
                 />
               </div>
 
@@ -102,25 +201,21 @@ const Checkout = () => {
               <FormField
                 label="Country / Region"
                 name="country"
-                required
               />
 
               <FormField
                 label="Street address"
                 name="streetAddress"
-                required
               />
 
               <FormField
                 label="Town / City"
                 name="city"
-                required
               />
 
               <FormField
                 label="Province"
                 name="province"
-                required
               />
 
               <FormField
@@ -132,7 +227,6 @@ const Checkout = () => {
                 label="Email address"
                 name="email"
                 type="email"
-                required
               />
 
               {/* Additional information */}
@@ -312,6 +406,7 @@ const Checkout = () => {
             {/* Submit */}
             <button
               type="submit"
+              disabled={isSubmitting}
               className="
                 mt-8
                 flex
@@ -332,9 +427,11 @@ const Checkout = () => {
                 focus:outline-none
                 focus:ring-2
                 focus:ring-neutral-300
+                disabled:opacity-60
+                disabled:cursor-not-allowed
               "
             >
-              Place order
+              {isSubmitting ? "Processing..." : "Place order"}
             </button>
           </aside>
         </form>
